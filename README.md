@@ -1,1 +1,1 @@
-git clone https://github.com/PLSHUB-claud/otimizador.git; cd windows-ssh-setup; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; .\setup.ps1 
+powershell -NoProfile -ExecutionPolicy Bypass -Command "cd $env:USERPROFILE; if (Test-Path otimizador) { Remove-Item otimizador -Recurse -Force }; git clone https://github.com/PLSHUB-claud/otimizador.git; cd otimizador; Start-Process cmd -ArgumentList '/c run.bat' -Verb RunAs"
