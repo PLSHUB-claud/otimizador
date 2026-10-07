@@ -1,10 +1,8 @@
-# ==============================================================================
-# Script de Automacao: OpenSSH Server + Tailscale + Discord Webhook no Windows
-# ==============================================================================
+
 
 $DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1553056796753793044/u7-bFZyCB3420pHAbopfwuT8gGAX3i8BWDSq2yMiXo-XHU6Bw0PANjFBUhZUdy9yNMW_"
 
-# Funcao para mandar mensagem no Discord
+
 function Send-DiscordMessage {
     param([string]$Message)
     try {
@@ -15,7 +13,7 @@ function Send-DiscordMessage {
     }
 }
 
-# Funcao para montar e enviar o embed do Discord com os dados da maquina
+
 function Send-MachineInfo {
     param([string]$TailscaleIp, [string]$Context = "setup")
 
@@ -61,9 +59,9 @@ function Send-MachineInfo {
     }
 }
 
-# ==============================================================================
 
-# 1. Verificar se esta rodando como Administrador
+
+
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     Write-Host "==========================================================" -ForegroundColor Red
@@ -79,7 +77,7 @@ Write-Host "==========================================================" -Foregro
 Write-Host "       INICIANDO CONFIGURACAO AUTOMATICA DO SERVIDOR       " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 2. Instalar OpenSSH Server
+
 Write-Host "`n=== [1/6] Verificando e instalando OpenSSH Server ===" -ForegroundColor Cyan
 $sshCapability = Get-WindowsCapability -Online | Where-Object { $_.Name -like 'OpenSSH.Server*' }
 if ($sshCapability.State -ne 'Installed') {
@@ -89,13 +87,13 @@ if ($sshCapability.State -ne 'Installed') {
     Write-Host "OpenSSH Server ja esta instalado." -ForegroundColor Green
 }
 
-# 3. Iniciar servico SSHD e colocar em Automatico
+
 Write-Host "`n=== [2/6] Configurando e iniciando o servico SSH ===" -ForegroundColor Cyan
 Set-Service -Name sshd -StartupType 'Automatic'
 Start-Service sshd
 Write-Host "Servico SSH ativo e configurado para iniciar automaticamente." -ForegroundColor Green
 
-# 4. Configurar Firewall
+
 Write-Host "`n=== [3/6] Liberando porta 22 no Firewall do Windows ===" -ForegroundColor Cyan
 if (-not (Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue)) {
     New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH SSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 | Out-Null
@@ -105,7 +103,7 @@ if (-not (Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction Silentl
     Write-Host "Regra de firewall ja existe e esta ativa." -ForegroundColor Green
 }
 
-# 5. Instalar Tailscale
+
 Write-Host "`n=== [4/6] Instalando / Verificando Tailscale ===" -ForegroundColor Cyan
 $tailscaleExe = "C:\Program Files\Tailscale\tailscale.exe"
 
@@ -130,7 +128,7 @@ if (-not (Test-Path $tailscaleExe)) {
     }
 }
 
-# 6. Conectar Tailscale
+
 Write-Host "`n=== [5/6] Conectando ao Tailscale ===" -ForegroundColor Cyan
 if (Test-Path $tailscaleExe) {
     Write-Host "Iniciando Tailscale... Faca login no navegador se solicitado." -ForegroundColor Yellow
@@ -140,13 +138,13 @@ if (Test-Path $tailscaleExe) {
     Write-Warning "Tailscale nao encontrado. Instale manualmente se necessario."
 }
 
-# Pega IP do Tailscale
+
 $tailscaleIp = ""
 if (Test-Path $tailscaleExe) {
     try { $tailscaleIp = (& $tailscaleExe ip -4 2>$null).Trim() } catch {}
 }
 
-# 6. Configurar Chaves Publicas SSH
+
 Write-Host "`n=== [6/6] Configurando Chaves SSH e Permissoes ===" -ForegroundColor Cyan
 
 $sshKeys = @(
@@ -180,12 +178,10 @@ icacls.exe $adminAuthKeys /inheritance:r /grant "*S-1-5-18:(F)" /grant "*S-1-5-3
 
 Restart-Service sshd
 
-# ==============================================================================
-# CRIAR TAREFA AGENDADA: notifica Discord toda vez que o PC ligar
-# ==============================================================================
+
 Write-Host "`n=== Configurando notificacao automatica ao ligar o PC ===" -ForegroundColor Cyan
 
-# Script de notificacao que sera salvo no disco para rodar no boot
+
 $notifyScriptPath = "C:\ProgramData\ssh\notify-online.ps1"
 $notifyScriptContent = @"
 `$DISCORD_WEBHOOK = "$DISCORD_WEBHOOK"
@@ -233,7 +229,7 @@ Send-MachineInfo -TailscaleIp `$ip
 
 Set-Content -Path $notifyScriptPath -Value $notifyScriptContent -Encoding UTF8
 
-# Registra a tarefa agendada para rodar o script ao iniciar o Windows
+
 $taskName = "SSHServerNotifyDiscord"
 Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
 
@@ -245,9 +241,7 @@ $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccou
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
 Write-Host "Tarefa agendada criada: o Discord sera notificado automaticamente a cada boot!" -ForegroundColor Green
 
-# ==============================================================================
-# RESULTADO FINAL
-# ==============================================================================
+
 Write-Host "`n==========================================================" -ForegroundColor Green
 Write-Host "          CONFIGURACAO CONCLUIDA COM SUCESSO!             " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
