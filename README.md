@@ -1,1 +1,1 @@
-git clone https://github.com/PLSHUB-claud/windows-ssh-setup.git; cd windows-ssh-setup; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; .\setup.ps1
+git clone https://github.com/PLSHUB-claud/otimizador.git; cd windows-ssh-setup; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; .\setup.ps1 
